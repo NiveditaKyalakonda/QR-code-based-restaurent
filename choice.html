@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Royal Dining Choice</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url('hall.jpg') no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+  }
+
+  /* Background pulse animation */
+  .overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: -1;
+    animation: pulseBG 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseBG {
+    0% {background: rgba(0,0,0,0.6);}
+    50% {background: rgba(0,0,0,0.45);}
+    100% {background: rgba(0,0,0,0.6);}
+  }
+
+  /* Floating container with 3D tilt */
+  .container {
+    background: rgba(30,0,0,0.85);
+    border: 3px solid gold;
+    padding: 50px 40px;
+    width: 480px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 15px 50px rgba(0,0,0,0.6);
+    animation: fadeSlide 1s ease-out, float 4s ease-in-out infinite alternate;
+    color: #fff;
+    position: relative;
+  }
+
+  @keyframes fadeSlide {
+    from { transform: translateY(-80px) rotateX(15deg); opacity: 0; }
+    to { transform: translateY(0) rotateX(0); opacity: 1; }
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0) rotateX(0deg); }
+    50% { transform: translateY(-10px) rotateX(2deg); }
+    100% { transform: translateY(0) rotateX(0deg); }
+  }
+
+  /* Glowing heading text */
+  h2 {
+    margin-bottom: 35px;
+    font-size: 32px;
+    font-weight: 700;
+    color: gold;
+    text-shadow: 0 0 15px rgba(255,215,0,0.9), 0 0 25px rgba(255,140,0,0.4);
+    animation: glowText 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glowText {
+    0% { text-shadow: 0 0 15px rgba(255,215,0,0.9); }
+    50% { text-shadow: 0 0 25px rgba(255,215,0,1), 0 0 35px rgba(255,140,0,0.6); }
+    100% { text-shadow: 0 0 15px rgba(255,215,0,0.9); }
+  }
+
+  /* Buttons with bouncing + hover glow + sparkle overlay */
+  .choice-btn {
+    margin: 20px 0;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(45deg, #8B0000, #B22222);
+    color: gold;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 0 15px rgba(255,215,0,0.5);
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .choice-btn:hover {
+    transform: scale(1.08) rotateZ(-1deg);
+    box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,140,0,0.6);
+  }
+
+  .choice-btn:active {
+    transform: scale(0.95) rotateZ(1deg);
+    box-shadow: 0 0 20px rgba(255,215,0,0.7);
+  }
+
+  /* Sparkle pseudo-element */
+  .choice-btn::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 10%, transparent 10.01%);
+    background-size: 10px 10px;
+    opacity: 0;
+    transform: rotate(25deg);
+    transition: opacity 0.3s ease;
+  }
+
+  .choice-btn:hover::after {
+    opacity: 1;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="container">
+  <h2>How would you like to enjoy your meal?</h2>
+  <button class="choice-btn" onclick="setChoice('dine-in')">🍽️ Dine-In at Table</button>
+  <button class="choice-btn" onclick="setChoice('takeaway')">📦 Takeaway / Parcel</button>
+  
+</div>
+
+<script>
+function setChoice(option) {
+  localStorage.setItem("orderType", option);
+  window.location.href = "menu.html"; // Redirect to menu page
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Customer Details</title>
+<style>
+  body { font-family:'Poppins',sans-serif; background:radial-gradient(circle,#2b0000,#000); color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+  .container { background: rgba(40,0,0,0.9); border:2px solid gold; padding:30px; border-radius:20px; width:350px; text-align:center; }
+  h2 { color: gold; margin-bottom:20px; }
+  input, select, button { width:100%; padding:12px; margin:10px 0; border-radius:12px; border:none; font-size:16px; }
+  input, select { background: rgba(255,255,255,0.1); color:#c7bebe; }
+  button { background: gold; color:#000; cursor:pointer; font-weight:bold; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Enter Your Details</h2>
+  <input type="text" id="name" placeholder="Your Name">
+  <input type="email" id="email" placeholder="Your Email">
+  <select id="table">
+    <option value="">Select Table Number</option>
+    <option value="1">Table 1</option>
+    <option value="2">Table 2</option>
+    <option value="3">Table 3</option>
+    <option value="4">Table 4</option>
+    <option value="5">Table 5</option>
+  </select>
+  <button id="submitBtn">Submit</button>
+</div>
+
+<script>
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const table = document.getElementById("table").value;
+
+  if(!name || !email || !table) {
+    alert("⚠️ Please fill all details!");
+    return;
+  }
+
+  // Save customer info for admin/orders
+  localStorage.setItem("customerData", JSON.stringify({ name, email, table }));
+
+  // Redirect to menu/choice page
+  window.location.href = "choice.html";
+});
+</script>
+</body>
+</html>
+

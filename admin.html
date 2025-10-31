@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Royal Palace Dining - Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Poppins&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at center, #2b0000, #000);
+    color: #fff;
+    min-height: 100vh;
+  }
+  header {
+    background: rgba(40,0,0,0.92);
+    padding: 20px;
+    border-bottom: 2px solid gold;
+    text-align: center;
+    position: relative;
+  }
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    color: gold;
+    font-size: 36px;
+    animation: glow 1.5s infinite alternate;
+  }
+  @keyframes glow {
+    0% { text-shadow: 0 0 10px gold; }
+    100% { text-shadow: 0 0 30px gold; }
+  }
+  .logout {
+    position: absolute; right: 30px; top: 25px;
+    background: crimson; color: white;
+    padding: 8px 14px; border: none;
+    border-radius: 10px; cursor: pointer;
+  }
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background: rgba(255,215,0,0.1);
+    border-bottom: 2px solid gold;
+  }
+  .stat {
+    background: rgba(40,0,0,0.8);
+    border: 2px solid gold;
+    border-radius: 15px;
+    padding: 15px 25px;
+    text-align: center;
+    width: 22%;
+  }
+  .stat h2 {
+    color: gold;
+    font-family: 'Cinzel Decorative', serif;
+    margin-bottom: 5px;
+  }
+  .container { padding: 30px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid gold;
+    background: rgba(40,0,0,0.9);
+    border-radius: 10px;
+  }
+  th, td {
+    border-bottom: 1px solid gold;
+    padding: 10px;
+    text-align: center;
+  }
+  th {
+    background: rgba(255,215,0,0.2);
+    color: gold;
+    font-family: 'Cinzel Decorative', serif;
+  }
+  tr:hover { background: rgba(255,215,0,0.1); }
+  button {
+    background: gold; color: black;
+    border: none; padding: 6px 10px;
+    border-radius: 8px; cursor: pointer;
+  }
+  button:hover { background: #ffdd44; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Royal Palace Dining - Admin Panel</h1>
+  <button class="logout" onclick="logout()">Logout</button>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <h2 id="totalOrders">0</h2>
+    <p>Total Orders</p>
+  </div>
+  <div class="stat">
+    <h2 id="pendingOrders">0</h2>
+    <p>Pending Orders</p>
+  </div>
+  <div class="stat">
+    <h2 id="paidOrders">0</h2>
+    <p>Paid Orders</p>
+  </div>
+  <div class="stat">
+    <h2 id="totalRevenue">₹0</h2>
+    <p>Total Revenue</p>
+  </div>
+</div>
+
+<div class="container">
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer Name</th>
+        <th>Email</th>
+        <th>Table No</th>
+        <th>Items</th>
+        <th>Total (₹)</th>
+        <th>Date & Time</th>
+        <th>Order Type</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  // Redirect if admin not logged in
+  if(!localStorage.getItem("isAdminLoggedIn")){
+    window.location.href = "login.html";
+  }
+
+  function loadOrders(){
+    const tbody = document.querySelector("#ordersTable tbody");
+    const orders = JSON.parse(localStorage.getItem("allOrders") || "[]");
+    tbody.innerHTML = "";
+
+    if(orders.length === 0){
+      tbody.innerHTML = "<tr><td colspan='10'>No orders yet</td></tr>";
+      updateStats([]);
+      return;
+    }
+
+    orders.forEach(order => {
+      const items = order.items.map(i => `${i.name} (${i.qty})`).join(", ");
+      const date = new Date(order.createdAt);
+      const dateStr = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${order.id}</td>
+          <td>${order.customer.name}</td>
+          <td>${order.customer.email}</td>
+          <td>${order.tableNo || "-"}</td>
+          <td>${items}</td>
+          <td>₹${order.total}</td>
+          <td>${dateStr}</td>
+          <td>${order.orderType}</td>
+          <td>${order.paymentStatus}</td>
+          <td>${order.paymentStatus === "pending" ? `<button onclick="markPaid('${order.id}')">Mark Paid</button>` : "Paid"}</td>
+        </tr>`;
+    });
+
+    updateStats(orders);
+  }
+
+  function updateStats(orders){
+    const total = orders.length;
+    const pending = orders.filter(o => o.paymentStatus === "pending").length;
+    const paid = orders.filter(o => o.paymentStatus === "paid").length;
+    const revenue = orders.filter(o => o.paymentStatus === "paid").reduce((sum, o) => sum + o.total, 0);
+
+    document.getElementById("totalOrders").textContent = total;
+    document.getElementById("pendingOrders").textContent = pending;
+    document.getElementById("paidOrders").textContent = paid;
+    document.getElementById("totalRevenue").textContent = `₹${revenue}`;
+  }
+
+  function markPaid(id){
+    let orders = JSON.parse(localStorage.getItem("allOrders") || "[]");
+    orders = orders.map(o => o.id === id ? {...o, paymentStatus:"paid"} : o);
+    localStorage.setItem("allOrders", JSON.stringify(orders));
+    loadOrders();
+  }
+
+  function logout() {
+    localStorage.removeItem("isAdminLoggedIn");
+    alert("You have been logged out!");
+    window.location.href = "login.html";
+  }
+
+  // Initial load and refresh every 30s
+  loadOrders();
+  setInterval(loadOrders, 30000);
+</script>
+
+</body>
+</html>

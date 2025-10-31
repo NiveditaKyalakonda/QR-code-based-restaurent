@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Royal Restaurant Menu</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background-image: url('hall.jpg'); /* 🍷 Restaurant themed image */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Dark overlay */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      background: rgba(90, 0, 0, 0.9); /* Maroon overlay */
+      color: gold;
+      font-size: 24px;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    }
+
+    .cart-icon {
+      cursor: pointer;
+      font-size: 28px;
+      transition: 0.3s;
+    }
+    .cart-icon:hover {
+      transform: scale(1.1);
+      color: #ffdf6c;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 25px 0;
+      font-size: 32px;
+      color: gold;
+      text-shadow: 0 0 12px rgba(255,215,0,0.9);
+      animation: glow 2s infinite alternate;
+    }
+
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+      to { text-shadow: 0 0 18px rgba(255,215,0,1); }
+    }
+
+    .category {
+      grid-column: 1 / -1;
+      font-size: 26px;
+      font-weight: bold;
+      margin: 20px 0 12px;
+      text-align: left;
+      color: #ffdf6c;
+      border-bottom: 2px solid gold;
+      padding-bottom: 6px;
+    }
+
+    #menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .card {
+      background: rgba(40, 0, 0, 0.8);
+      border: 2px solid rgba(255,215,0,0.6);
+      border-radius: 18px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: fadeUp 1s ease forwards;
+      opacity: 0;
+      color: #fff;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+    }
+
+    .card img {
+      width: 100%;
+      height: 150px;
+      border-radius: 14px;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid gold;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(45deg, #8B0000, #B22222);
+      color: gold;
+      font-weight: bold;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: 0.3s ease;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.3);
+      transform: skewX(-25deg);
+      transition: 0.6s;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(255,215,0,0.5);
+    }
+
+    @keyframes fadeUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    footer {
+      background: rgba(30, 0, 0, 0.9);
+      color: #ffdf6c;
+      text-align: center;
+      padding: 18px;
+      font-size: 14px;
+      margin-top: auto;
+      border-top: 2px solid gold;
+    }
+
+    footer p {
+      margin: 6px 0;
+    }
+
+    #greeting {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #ffdf6c;
+      font-weight: bold;
+    }
+    #cartPreview {
+      position:fixed; right:20px; bottom:20px; background:rgba(40,0,0,0.95);
+      border:2px solid gold; border-radius:12px; padding:15px; width:280px;
+      max-height:400px; overflow-y:auto; display:none; color:#fff; z-index:2000;
+    }
+    
+  </style>
+  
+</head>
+<body>
+
+  <div class="overlay"></div>
+
+  <header>
+    👑 Royal Restaurant
+    <div class="cart-icon" onclick="goToCart()">🛒 Cart</div>
+  </header>
+
+  <h1>📖 Our Premium Menu</h1>
+  <h2 id="greeting"></h2>
+
+  <section id="menu"> 
+  
+  </section>
+
+  <footer>
+    <p>👑 Powered by Royal Restaurant Ordering System</p>
+    <p>&copy; 2025 Royal Restaurant | All Rights Reserved</p>
+    <p>📞 +91 98765 43210 | ✉️ support@royalrestaurant.com</p>
+  </footer>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let customer = JSON.parse(localStorage.getItem("customerData"));
+    if (customer) {
+      document.getElementById("greeting").innerText =
+        `Welcome, ${customer.name}! 🎉 (Table ${customer.table})`;
+    }
+
+    const menu = {
+      "Main Course": [
+        { name: "Paneer Butter Masala", price: 220, image: "paneer.jpg" },
+        { name: "Chicken Biryani", price: 280, image: "biryani.jpg" },
+        { name: "Dal Makhani", price: 180, image: "dal.jpg" },
+        { name: "Rajma Chawal", price: 160, image: "rajma.jpg" },
+        { name: "Palak Paneer", price: 210, image: "palak.jpg" },
+        { name: "Chole Bhature", price: 150, image: "chole.jpg" },
+         { name: "Mutton Curry", price: 350, image: "mutton.jpg" },
+        { name: "Veg Pulao", price: 170, image: "pulao.jpg" },
+        { name: "Tandoori Roti", price: 30, image: "roti.jpg" },
+        { name: "Butter Naan", price: 50, image: "naan.jpg" }
+      ],
+      "Starters": [
+        { name: "Spring Rolls", price: 120, image: "spring.jpg" },
+        { name: "Paneer Tikka", price: 180, image: "tikka.jpg" },
+        { name: "Chicken Tandoori", price: 250, image: "tandoori.jpg" },
+        { name: "Veg Manchurian", price: 140, image: "manchurian.jpg" },
+        { name: "French Fries", price: 100, image: "fries.jpg" },
+        { name: "Onion Rings", price: 90, image: "onion.jpg" },
+        { name: "Garlic Bread", price: 110, image: "garlic.jpg" },
+        { name: "Cheese Balls", price: 150, image: "cheese.jpg" },
+        { name: "Fish Fingers", price: 220, image: "fish.jpg" },
+        { name: "Hara Bhara Kebab", price: 180, image: "kebab.jpg" }
+      ],
+      "Desserts": [
+        { name: "Gulab Jamun", price: 80, image: "gulab.jpg" },
+        { name: "Rasgulla", price: 90, image: "rasgulla.jpg" },
+        { name: "Ice Cream", price: 100, image: "icecream.jpg" },
+        { name: "Chocolate Cake", price: 150, image: "cake.jpg" },
+        { name: "Brownie", price: 170, image: "brownie.jpg" },
+        { name: "Cheesecake", price: 200, image: "cheese_cake.jpg" },
+        { name: "Kheer", price: 120, image: "kheer.jpg" },
+        { name: "Fruit Salad", price: 110, image: "fruit.jpg" },
+        { name: "Donut", price: 90, image: "donut.jpg" },
+        { name: "Ice-Cream Sundae", price: 180, image: "sundae.jpg" }
+      ]
+    };
+
+    function renderMenu() {
+      const container = document.getElementById("menu");
+      container.innerHTML = "";
+      Object.keys(menu).forEach(cat => {
+        const title = document.createElement("div");
+        title.className = "category";
+        title.innerText = cat;
+        container.appendChild(title);
+
+        menu[cat].forEach(m => {
+          const div = document.createElement("div");
+          div.className = "card";
+           div.innerHTML = `
+            <img src="${m.image}" alt="${m.name}">
+            <h3>${m.name}</h3>
+            <p>₹${m.price}</p>
+            <button onclick="addToCart('${m.name}', ${m.price})">Add to Cart</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+    
+  function addToCart(name, price) {
+    const item = cart.find(i => i.name === name);
+    if (item) {
+      item.qty += 1;
+    } else {
+      cart.push({ name, price, qty: 1 });
+    }
+    saveCart();
+    renderCart();
+  }
+  
+  function changeQty(name, delta) {
+    const item = cart.find(i => i.name === name);
+    if (item) {
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.name !== name);
+      }
+      saveCart();
+      renderCart();
+    }
+  }
+  function renderCart() {
+    const cartDiv = document.getElementById("cartItems");
+    cartDiv.innerHTML = "";
+    let total = 0;
+    cart.forEach(item => {
+      const subtotal = item.qty * item.price;
+      total += subtotal;
+      cartDiv.innerHTML += `
+        <div class="cart-item">
+          <span>${item.name}</span>
+          <div>
+            <button class="qty-btn" onclick="changeQty('${item.name}', -1)">➖</button>
+            ${item.qty}
+            <button class="qty-btn" onclick="changeQty('${item.name}', 1)">➕</button>
+            = ₹${subtotal}
+          </div>
+        </div>
+      `;
+    });
+    document.getElementById("cartTotal").innerText = "Total: ₹" + total;
+  }
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
+
+  function toggleCart() {
+    const preview = document.getElementById("cartPreview");
+    preview.style.display = (preview.style.display === "block") ? "none" : "block";
+    renderCart();
+  }
+
+    
+    function goToCart() {
+      window.location.href = "cart.html";
+    }
+
+    renderMenu();
+    
+  </script>
+  <script>
+let orderType = localStorage.getItem("orderType");
+if(!orderType){ window.location.href="choice.html"; }
+</script>
+
+  </body>
+</html>

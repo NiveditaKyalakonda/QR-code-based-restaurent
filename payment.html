@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>💳 Royal Payment</title>
+<style>
+  body {
+    font-family:"Poppins",sans-serif;
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background-image:url('hall.jpg');
+    background-size:cover;
+    color:#fff;
+  }
+  .overlay {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.75); z-index:-1;
+  }
+  .payment-box {
+    background: rgba(40,0,0,0.85);
+    padding:30px;
+    border-radius:16px;
+    width:400px;
+    text-align:center;
+    border:2px solid gold;
+  }
+  h1 { color: gold; font-size:32px; margin-bottom:20px; }
+  .order-type { font-size:20px; color:#ffdf6c; font-weight:bold; margin-bottom:10px; }
+  .amount { font-size:24px; color:#ffdf6c; margin-bottom:15px; }
+  label { display:block; text-align:left; margin-top:10px; }
+  input, select, button { width:100%; margin-top:8px; padding:10px; border-radius:10px; border:none; font-size:16px; }
+  input, select { background:rgba(255,255,255,0.2); color:#000; }
+  button { background:linear-gradient(45deg,#8B0000,#B22222); color:gold; font-weight:bold; cursor:pointer; margin-top:15px; }
+  #msg { display:none; margin-top:15px; color:#ffdf6c; font-weight:bold; }
+  .back { display:block; margin-top:10px; cursor:pointer; text-decoration:underline; color:#ffdf6c; }
+</style>
+</head>
+<body>
+<div class="overlay"></div>
+
+<div class="payment-box">
+  <h1>💳 Royal Payment</h1>
+
+  <!-- Display Order Type -->
+  <div class="order-type" id="orderTypeBox"></div>
+
+  <div class="amount" id="amountBox">Total: ₹0</div>
+
+  <label for="method">Payment Method</label>
+  <select id="method">
+    <option value="upi">UPI</option>
+  </select>
+
+  <label for="password">Enter Payment Password</label>
+  <input type="password" id="password" placeholder="Enter your password">
+
+  <button onclick="makePayment()">Pay Securely</button>
+  <div id="msg"></div>
+  <span class="back" onclick="goBack()">⬅️ Back to Cart</span>
+</div>
+
+<script>
+  // Read total from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const amount = urlParams.get("amount") || 0;
+  document.getElementById("amountBox").innerText = "Total: ₹" + amount;
+
+  // Display Order Type
+  const orderType = localStorage.getItem("orderType");
+  if(!orderType) { window.location.href = "choice.html"; }
+  document.getElementById("orderTypeBox").innerText =
+    `Order Type: ${orderType === 'dine-in' ? '🍽️ Dine-In' : '📦 Takeaway'}`;
+
+  function makePayment(){
+    const password = document.getElementById("password").value;
+    const method = document.getElementById("method").value;
+    if(!password){ alert("⚠️ Enter password"); return; }
+    document.getElementById("msg").style.display="block";
+    document.getElementById("msg").innerText = `✅ Payment Successful via ${method.toUpperCase()}! 🎉 Your royal order will be ready shortly 🍽️`;
+    localStorage.removeItem("cart");
+  }
+
+  function goBack(){ window.location.href="cart.html"; }
+  fetch("/api/order", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    customerName: customer.name,
+    tableNumber: customer.table,
+    orderType: localStorage.getItem("orderType"),
+    items: cart,           // array from localStorage
+    totalAmount: amount,   // total from URL param
+    paymentMethod: "UPI"
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data))
+.catch(err => console.error(err));
+
+let allOrders = JSON.parse(localStorage.getItem("allOrders") || "[]");
+const orderId = Date.now(); // unique ID
+allOrders.push({
+  id: orderId,
+  customer: JSON.parse(localStorage.getItem("customerData")),
+  tableNo: JSON.parse(localStorage.getItem("customerData"))?.table || null,
+  items: JSON.parse(localStorage.getItem("cart")) || [],
+  total: parseInt(amount),
+  orderType: localStorage.getItem("orderType"),
+  paymentStatus: "paid",
+  createdAt: new Date().toISOString()
+});
+localStorage.setItem("allOrders", JSON.stringify(allOrders));
+
+
+</script>
+</body>
+</html>
